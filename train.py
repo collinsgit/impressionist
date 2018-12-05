@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 import dataloader
-from model import FeatureModel
+from models.FeatureModel import FeatureModel
 
 
 def run():
@@ -36,7 +36,7 @@ def run():
 
             optimizer.zero_grad()
             outputs = model(images, patches)
-            outputs = outputs.view((outputs.size(0), -1))
+            outputs = outputs.contiguous().view((outputs.size(0), -1))
             loss = loss_func(outputs, labels)
             loss.backward()
 
@@ -45,9 +45,10 @@ def run():
 
             gc.collect()
             if batch_num % output_period == 0:
-                print('Loss: {0:.2f}'.format(running_loss / output_period))
+                print('Loss: {0:.4f}'.format(running_loss / output_period))
                 running_loss = 0.
 
+        torch.save(model.state_dict(), 'models/model.{0:}'.format(epoch))
         epoch += 1
 
 
